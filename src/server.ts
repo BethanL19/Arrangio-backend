@@ -69,6 +69,66 @@ app.get("/comments/:card_id", async (req, res) => {
     }
 });
 
+// post a board
+app.post("/boards", async (req, res) => {
+    const { name } = req.body;
+    try {
+        const board = await client.query(
+            "insert into boards (name) values ($1) returning *",
+            [name]
+        );
+        res.status(200).json(board.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
+
+// post a list
+app.post("/lists", async (req, res) => {
+    const { board_id, name } = req.body;
+    try {
+        const list = await client.query(
+            "insert into lists (board_id, name) values ($1, $2) returning *",
+            [board_id, name]
+        );
+        res.status(200).json(list.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
+
+// post a card
+app.post("/cards", async (req, res) => {
+    const { list_id, name } = req.body;
+    try {
+        const card = await client.query(
+            "insert into cards (list_id, name) values ($1, $2) returning *",
+            [list_id, name]
+        );
+        res.status(200).json(card.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
+
+// post a comment
+app.post("/comments", async (req, res) => {
+    const { card_id, text } = req.body;
+    try {
+        const comment = await client.query(
+            "insert into comments (card_id, text) values ($1, $2) returning *",
+            [card_id, text]
+        );
+        res.status(200).json(comment.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
+
 app.get("/health-check", async (_req, res) => {
     try {
         //For this to be successful, must connect to db
