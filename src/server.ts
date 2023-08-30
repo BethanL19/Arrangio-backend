@@ -4,6 +4,7 @@ import express from "express";
 import { Client } from "pg";
 import { getEnvVarOrFail } from "./support/envVarUtils";
 import { setupDBClientConfig } from "./support/setupDBClientConfig";
+import queryAndLog from "./queryAndLog";
 
 dotenv.config(); //Read .env file lines as though they were env vars.
 
@@ -19,7 +20,7 @@ app.use(cors()); //add CORS support to each following route handler
 // get all boards
 app.get("/boards", async (_req, res) => {
     try {
-        const boards = await client.query("select * from boards");
+        const boards = await queryAndLog(client, "select * from boards");
         res.status(200).json(boards.rows);
     } catch (error) {
         console.error(error);
@@ -30,7 +31,8 @@ app.get("/boards", async (_req, res) => {
 app.get("/lists/:board_id", async (req, res) => {
     try {
         const id = parseInt(req.params.board_id);
-        const lists = await client.query(
+        const lists = await queryAndLog(
+            client,
             "select * from lists where board_id = $1",
             [id]
         );
@@ -44,7 +46,8 @@ app.get("/lists/:board_id", async (req, res) => {
 app.get("/cards/:list_id", async (req, res) => {
     try {
         const id = parseInt(req.params.list_id);
-        const cards = await client.query(
+        const cards = await queryAndLog(
+            client,
             "select * from cards where list_id = $1",
             [id]
         );
@@ -58,7 +61,8 @@ app.get("/cards/:list_id", async (req, res) => {
 app.get("/comments/:card_id", async (req, res) => {
     try {
         const id = parseInt(req.params.card_id);
-        const comments = await client.query(
+        const comments = await queryAndLog(
+            client,
             "select * from comments where card_id = $1",
             [id]
         );
@@ -73,7 +77,8 @@ app.get("/comments/:card_id", async (req, res) => {
 app.post("/boards", async (req, res) => {
     const { name } = req.body;
     try {
-        const board = await client.query(
+        const board = await queryAndLog(
+            client,
             "insert into boards (name) values ($1) returning *",
             [name]
         );
@@ -88,7 +93,8 @@ app.post("/boards", async (req, res) => {
 app.post("/lists", async (req, res) => {
     const { board_id, name } = req.body;
     try {
-        const list = await client.query(
+        const list = await queryAndLog(
+            client,
             "insert into lists (board_id, name) values ($1, $2) returning *",
             [board_id, name]
         );
@@ -103,7 +109,8 @@ app.post("/lists", async (req, res) => {
 app.post("/cards", async (req, res) => {
     const { list_id, name } = req.body;
     try {
-        const card = await client.query(
+        const card = await queryAndLog(
+            client,
             "insert into cards (list_id, name) values ($1, $2) returning *",
             [list_id, name]
         );
@@ -118,7 +125,8 @@ app.post("/cards", async (req, res) => {
 app.post("/comments", async (req, res) => {
     const { card_id, text } = req.body;
     try {
-        const comment = await client.query(
+        const comment = await queryAndLog(
+            client,
             "insert into comments (card_id, text) values ($1, $2) returning *",
             [card_id, text]
         );
@@ -132,7 +140,7 @@ app.post("/comments", async (req, res) => {
 app.get("/health-check", async (_req, res) => {
     try {
         //For this to be successful, must connect to db
-        await client.query("select now()");
+        await queryAndLog(client, "select now()");
         res.status(200).send("system ok");
     } catch (error) {
         //Recover from error rather than letting system halt
