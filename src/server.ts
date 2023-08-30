@@ -149,6 +149,41 @@ app.get("/health-check", async (_req, res) => {
     }
 });
 
+app.put("/cards/:card_id", async (req, res) => {
+    const { name } = req.body;
+
+    try {
+        const id = parseInt(req.params.card_id);
+        const cards = await queryAndLog(
+            client,
+            "update cards set name = $1 where card_id = $2 returning *",
+            [name, id]
+        );
+        res.status(200).json(cards.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
+
+app.delete("/cards/:card_id", async (req, res) => {
+    try {
+        const id = parseInt(req.params.card_id);
+        await queryAndLog(client, "delete from comments where card_id = $1", [
+            id,
+        ]);
+        const cards = await queryAndLog(
+            client,
+            "delete from cards where card_id = $1 returning *",
+            [id]
+        );
+        res.status(200).json(cards.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
+
 connectToDBAndStartListening();
 
 async function connectToDBAndStartListening() {
