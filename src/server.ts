@@ -183,6 +183,22 @@ app.delete("/cards/:card_id", async (req, res) => {
         res.status(500).send("Something went wrong!");
     }
 });
+app.put("/cards/move/:card_id", async (req, res) => {
+    const { list_id } = req.body;
+
+    try {
+        const id = parseInt(req.params.card_id);
+        const cards = await queryAndLog(
+            client,
+            "update cards set list_id = $1 where card_id = $2 returning *",
+            [list_id, id]
+        );
+        res.status(200).json(cards.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
 
 connectToDBAndStartListening();
 
