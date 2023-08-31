@@ -217,6 +217,21 @@ app.put("/cards/move/:card_id", async (req, res) => {
     }
 });
 
+app.delete("/comments/:comment_id", async (req, res) => {
+    try {
+        const id = parseInt(req.params.comment_id);
+        const comment = await queryAndLog(
+            client,
+            "delete from comments where comment_id = $1 returning *",
+            [id]
+        );
+        res.status(200).json(comment.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
+
 connectToDBAndStartListening();
 
 async function connectToDBAndStartListening() {
