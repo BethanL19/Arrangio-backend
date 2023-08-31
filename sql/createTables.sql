@@ -1,6 +1,12 @@
+drop table if exists comments;
+drop table if exists cards;
+drop table if exists lists;
+drop table if exists boards;
+
 create table if not exists boards(
 board_id serial primary key,
-  name varchar(50)
+  name varchar(50),
+  colour varchar(50) default('teal')
 );
 
 insert into boards (name) values ('test board');
@@ -23,6 +29,7 @@ card_id serial primary key,
 );
 insert into cards (list_id, name) values (1, 'Test'),(2, 'Test'),(3, 'Test');
 select * from cards;
+
 
 create table if not exists comments(
 comment_id serial primary key,

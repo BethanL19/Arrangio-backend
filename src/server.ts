@@ -215,7 +215,22 @@ app.delete("/comments/:comment_id", async (req, res) => {
         res.status(500).send("Something went wrong!");
     }
 });
+app.put("/boards/:board_id", async (req, res) => {
+    const { colour } = req.body;
 
+    try {
+        const id = parseInt(req.params.board_id);
+        const boards = await queryAndLog(
+            client,
+            "update boards set colour = $1 where board_id = $2 returning *",
+            [colour, id]
+        );
+        res.status(200).json(boards.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
 connectToDBAndStartListening();
 
 async function connectToDBAndStartListening() {
