@@ -166,6 +166,23 @@ app.put("/cards/:card_id", async (req, res) => {
     }
 });
 
+app.put("/comments/:comment_id", async (req, res) => {
+    const { text } = req.body;
+
+    try {
+        const id = parseInt(req.params.comment_id);
+        const cards = await queryAndLog(
+            client,
+            "update comments set text = $1 where comment_id = $2 returning *",
+            [text, id]
+        );
+        res.status(200).json(cards.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong!");
+    }
+});
+
 app.delete("/cards/:card_id", async (req, res) => {
     try {
         const id = parseInt(req.params.card_id);
